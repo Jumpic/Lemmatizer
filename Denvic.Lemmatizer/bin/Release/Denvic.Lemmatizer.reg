@@ -1,0 +1,41 @@
+REGEDIT4
+
+[HKEY_CLASSES_ROOT\Denvic.Lemmatizer]
+@="Denvic.Lemmatizer.LemmatizerDenvic"
+
+[HKEY_CLASSES_ROOT\Denvic.Lemmatizer\CLSID]
+@="{919D6695-7740-4FB6-B182-AC79C430BC54}"
+
+[HKEY_CLASSES_ROOT\CLSID\{919D6695-7740-4FB6-B182-AC79C430BC54}]
+@="Denvic.Lemmatizer.LemmatizerDenvic"
+
+[HKEY_CLASSES_ROOT\CLSID\{919D6695-7740-4FB6-B182-AC79C430BC54}\InprocServer32]
+@="mscoree.dll"
+"ThreadingModel"="Both"
+"Class"="Denvic.Lemmatizer.LemmatizerDenvic"
+"Assembly"="Denvic.Lemmatizer, Version=1.0.1.0, Culture=neutral, PublicKeyToken=null"
+"RuntimeVersion"="v4.0.30319"
+"CodeBase"="file:///E:/проекты/Denvic.Lemmatizer/Denvic.Lemmatizer/Denvic.Lemmatizer/bin/Release/Denvic.Lemmatizer.dll"
+
+[HKEY_CLASSES_ROOT\CLSID\{919D6695-7740-4FB6-B182-AC79C430BC54}\InprocServer32\1.0.1.0]
+"Class"="Denvic.Lemmatizer.LemmatizerDenvic"
+"Assembly"="Denvic.Lemmatizer, Version=1.0.1.0, Culture=neutral, PublicKeyToken=null"
+"RuntimeVersion"="v4.0.30319"
+"CodeBase"="file:///E:/проекты/Denvic.Lemmatizer/Denvic.Lemmatizer/Denvic.Lemmatizer/bin/Release/Denvic.Lemmatizer.dll"
+
+[HKEY_CLASSES_ROOT\CLSID\{919D6695-7740-4FB6-B182-AC79C430BC54}\ProgId]
+@="Denvic.Lemmatizer"
+
+[HKEY_CLASSES_ROOT\CLSID\{919D6695-7740-4FB6-B182-AC79C430BC54}\Implemented Categories\{62C8FE65-4EBB-45E7-B440-6E39B2CDBF29}]
+
+[HKEY_CLASSES_ROOT\Record\{DCE0D7E3-CE03-3318-99C1-4DD440122D84}\1.0.1.0]
+"Class"="LemmatizerNET.MorphLanguage"
+"Assembly"="Denvic.Lemmatizer, Version=1.0.1.0, Culture=neutral, PublicKeyToken=null"
+"RuntimeVersion"="v4.0.30319"
+"CodeBase"="file:///E:/проекты/Denvic.Lemmatizer/Denvic.Lemmatizer/Denvic.Lemmatizer/bin/Release/Denvic.Lemmatizer.dll"
+
+[HKEY_CLASSES_ROOT\Record\{8F0FE51B-1A7D-3C6C-B764-3A3A197CBDEE}\1.0.1.0]
+"Class"="LemmatizerNET.Subject"
+"Assembly"="Denvic.Lemmatizer, Version=1.0.1.0, Culture=neutral, PublicKeyToken=null"
+"RuntimeVersion"="v4.0.30319"
+"CodeBase"="file:///E:/проекты/Denvic.Lemmatizer/Denvic.Lemmatizer/Denvic.Lemmatizer/bin/Release/Denvic.Lemmatizer.dll"

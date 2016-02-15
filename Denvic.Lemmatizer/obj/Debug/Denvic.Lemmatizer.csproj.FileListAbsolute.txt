@@ -1,0 +1,6 @@
+E:\проекты\Denvic.Lemmatizer\Denvic.Lemmatizer\Denvic.Lemmatizer\bin\Debug\Denvic.Lemmatizer.tlb
+E:\проекты\Denvic.Lemmatizer\Denvic.Lemmatizer\Denvic.Lemmatizer\bin\Debug\Denvic.Lemmatizer.dll
+E:\проекты\Denvic.Lemmatizer\Denvic.Lemmatizer\Denvic.Lemmatizer\bin\Debug\Denvic.Lemmatizer.pdb
+E:\проекты\Denvic.Lemmatizer\Denvic.Lemmatizer\Denvic.Lemmatizer\obj\Debug\Denvic.Lemmatizer.dll
+E:\проекты\Denvic.Lemmatizer\Denvic.Lemmatizer\Denvic.Lemmatizer\obj\Debug\Denvic.Lemmatizer.pdb
+E:\проекты\Denvic.Lemmatizer\Denvic.Lemmatizer\Denvic.Lemmatizer\obj\Debug\Denvic.Lemmatizer.csprojResolveAssemblyReference.cache

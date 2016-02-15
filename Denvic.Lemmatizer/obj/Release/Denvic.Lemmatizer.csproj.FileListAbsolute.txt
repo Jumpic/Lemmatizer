@@ -1,0 +1,4 @@
+E:\проекты\Denvic.Lemmatizer\Denvic.Lemmatizer\Denvic.Lemmatizer\bin\Release\Denvic.Lemmatizer.dll
+E:\проекты\Denvic.Lemmatizer\Denvic.Lemmatizer\Denvic.Lemmatizer\bin\Release\Denvic.Lemmatizer.pdb
+E:\проекты\Denvic.Lemmatizer\Denvic.Lemmatizer\Denvic.Lemmatizer\obj\Release\Denvic.Lemmatizer.dll
+E:\проекты\Denvic.Lemmatizer\Denvic.Lemmatizer\Denvic.Lemmatizer\obj\Release\Denvic.Lemmatizer.pdb
