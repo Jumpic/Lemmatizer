@@ -113,7 +113,7 @@ namespace Denvic.Lemmatizer
         }
 
         /// <summary>
-        /// Инициализация библиотеки
+        /// Загрузка словарей
         /// </summary>
         /// <param name="RMLPath">Путь к каталогу о словарями</param>
         public void SetDict([MarshalAs(UnmanagedType.BStr)] string RMLPath = "")
@@ -130,7 +130,7 @@ namespace Denvic.Lemmatizer
         /// <summary>
         /// Возвращает лемму слова, DenvicLemma
         /// </summary>
-        /// <param name="word"></param>
+        /// <param name="word">Слово для которого требуется лемматизация</param>
         /// <returns></returns>
         [return: MarshalAs(UnmanagedType.Interface)]
         public DenvicLemma GetNormalForm([MarshalAs(UnmanagedType.BStr)] string word)
@@ -158,6 +158,7 @@ namespace Denvic.Lemmatizer
 
         /// <summary>
         /// Возвращает коллекцию неповторяющихся лемм глагола, прилагательного. существительного
+        /// Остальные слова, а также те которых нет в словарях, из конечной коллекции будут исключены
         /// </summary>
         /// <param name="text">Текст</param>
         /// <returns></returns>
@@ -174,8 +175,11 @@ namespace Denvic.Lemmatizer
             // Если слова нет в словаре, то оно не попадет в итоговую коллекцию
             //
             var result = arrayWords.GroupBy(x => x)
-                         .Select(x => GetNormalForm(x.Key)).Where(x => x.PartOfSpeech == "ИНФИНИТИВ" || x.PartOfSpeech == "С" || x.PartOfSpeech == "П")
-                         .ToArray();
+                        .Select(x => GetNormalForm(x.Key))
+                        .Where(x => x.PartOfSpeech == "ИНФИНИТИВ" || x.PartOfSpeech == "С" || x.PartOfSpeech == "П")
+                        .GroupBy(lem => lem.NormalForm)
+                        .Select(lem => lem.FirstOrDefault())
+                        .ToArray();
 
             return result;
         }
