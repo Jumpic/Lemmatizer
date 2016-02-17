@@ -12,11 +12,11 @@ namespace Denvic.Lemmatizer
     interface ILemmatizerDenvic
     {
         string Version { get; }
-        string GetNormalFormString(string word);
-        DenvicLemma GetNormalForm(string word);
-        Array GetNormalFormStringCollection(string text, bool duplicate = false);
-        Array GetNormalFormCollection(string text);
+        string GetNormalForm(string word);
+        DenvicLemma GetParadigm(string word);
+        Array GetNormalFormCollection(string text, bool duplicate = false);
+        Array GetParadigmCollection(string text);
 
-        void SetDict(string RMLPath = "");
+        void LoadDict(string RMLPath = "");
     }
 }
