@@ -8,13 +8,15 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Runtime.InteropServices.ComTypes;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace Denvic.Lemmatizer
 {
-    struct Lemrgramtab
+    struct ParadigmStruct
     {
         public string PartOfSpeech;
         public string EndingWord;
+        public string NormalForm;
         public string Kind;
     }
 
@@ -26,7 +28,7 @@ namespace Denvic.Lemmatizer
     {
         MorphLanguage lang = MorphLanguage.Russian;
         ILemmatizer lem;
-        List<Lemrgramtab> rgramtab;
+        List<ParadigmStruct> rgramtab;
 
         public LemmatizerDenvic()
         {
@@ -71,10 +73,9 @@ namespace Denvic.Lemmatizer
             [MarshalAs(UnmanagedType.Bool)] bool duplicate = false)
         {
             // Разбиваем текст на массив слов
-            // Убираем лишние пробелы
+            // Убираем знаки препинания, лишние пробелы и переносы строк
             //
-            var arrayWords = text.Split(' ')
-                .Where(x => !String.IsNullOrWhiteSpace(x));
+            var arrayWords = GetWordsFromText(text);
 
             // Преобразуем в нормальную форму
             // Если слова нет в словаре, то оно не попадет в итоговую коллекцию
@@ -125,14 +126,8 @@ namespace Denvic.Lemmatizer
         [return: MarshalAs(UnmanagedType.Interface)]
         public DenvicLemma GetParadigm([MarshalAs(UnmanagedType.BStr)] string word)
         {
-            var paradigmList = lem.CreateParadigmCollectionFromForm(word, false, false);
-            if (paradigmList.Count > 0)
-            {
-                var gram = rgramtab.Where(x => x.EndingWord == paradigmList[0].GetAncode(0)).Take(1).FirstOrDefault();
-                return new DenvicLemma(paradigmList[0].Norm, 0, gram.PartOfSpeech, gram.Kind);
-            }
-            else
-                return new DenvicLemma();
+            var paradigm = GetParadigmStruct(word);
+            return new DenvicLemma(paradigm.NormalForm, 1, paradigm.PartOfSpeech, paradigm.Kind);
         }
 
         /// <summary>
@@ -147,7 +142,10 @@ namespace Denvic.Lemmatizer
         }
 
         /// <summary>
-        /// Возвращает коллекцию неповторяющихся лемм глагола, прилагательного. существительного
+        /// Возвращает коллекцию неповторяющихся лемм. В коллекцию входят части речи: 
+        /// 1. Глагол
+        /// 2. Прилагательное
+        /// 3. Существительное
         /// Остальные слова, а также те которых нет в словарях, из конечной коллекции будут исключены
         /// </summary>
         /// <param name="text">Текст</param>
@@ -156,19 +154,17 @@ namespace Denvic.Lemmatizer
         public Array GetParadigmCollection([MarshalAs(UnmanagedType.BStr)] string text)
         {
             // Разбиваем текст на массив слов
-            // Убираем лишние пробелы
+            // Убираем знаки препинания, лишние пробелы и переносы строк
             //
-            var arrayWords = text.Split(' ')
-                .Where(x => !String.IsNullOrWhiteSpace(x));
+            var arrayWords = GetWordsFromText(text);
 
             // Преобразуем в нормальную форму
             // Если слова нет в словаре, то оно не попадет в итоговую коллекцию
             //
-            var result = arrayWords.GroupBy(x => x)
-                        .Select(x => GetParadigm(x.Key))
-                        .Where(x => x.PartOfSpeech == "ИНФИНИТИВ" || x.PartOfSpeech == "С" || x.PartOfSpeech == "П")
+            var result = arrayWords.Select(x => GetParadigmStruct(x))
+                        .Where(x => x.PartOfSpeech == "ИНФИНИТИВ" || x.PartOfSpeech == "С" || x.PartOfSpeech == "П").ToArray()
                         .GroupBy(lem => lem.NormalForm)
-                        .Select(lem => lem.FirstOrDefault())
+                        .Select(lem => new DenvicLemma(lem.Key, lem.Count(), lem.First().PartOfSpeech, lem.First().Kind))
                         .ToArray();
 
             return result;
@@ -185,23 +181,9 @@ namespace Denvic.Lemmatizer
             return GetParadigmCollection(text);
         }
 
-        List<Lemrgramtab> GetGramtab(string RMLPath)
-        {
-            var result = new List<Lemrgramtab>();
-            var fileStrings = System.IO.File.ReadAllLines(Path.GetFullPath(RMLPath) + @"\Dicts\Morph\rgramtab.tab", Encoding.GetEncoding(1251));
-            for (int i = 0; i < fileStrings.Length; i++)
-            {
-                if (!String.IsNullOrWhiteSpace(fileStrings[i]) && fileStrings[i].Length > 1 && fileStrings[i][1] != '/')
-                {
-                    var arrayString = fileStrings[i].Split(' ');
-                    if (arrayString.Length > 3)
-                        result.Add(new Lemrgramtab() { EndingWord = arrayString[0], PartOfSpeech = arrayString[2], Kind = arrayString[3] });
-                }
-            }
-
-            return result;
-        }
-
+        /// <summary>
+        /// Версия библиотеки
+        /// </summary>
         public string Version
         {
             get
@@ -209,6 +191,62 @@ namespace Denvic.Lemmatizer
                 var version = typeof(LemmatizerDenvic).Assembly.GetName().Version;
                 return String.Format("{0}.{1}.{2}", version.Major, version.Minor, version.Build);
             }
+        }
+
+        /// <summary>
+        /// Загрузка соответсвий частей речи, окончаний и т.п.
+        /// </summary>
+        /// <param name="RMLPath">Путь к каталогу со словарями</param>
+        /// <returns></returns>
+        private List<ParadigmStruct> GetGramtab(string RMLPath)
+        {
+            var result = new List<ParadigmStruct>();
+            var fileStrings = System.IO.File.ReadAllLines(Path.GetFullPath(RMLPath) + @"\Dicts\Morph\rgramtab.tab", Encoding.GetEncoding(1251));
+            for (int i = 0; i < fileStrings.Length; i++)
+            {
+                if (!String.IsNullOrWhiteSpace(fileStrings[i]) && fileStrings[i].Length > 1 && fileStrings[i][1] != '/')
+                {
+                    var arrayString = fileStrings[i].Split(' ');
+                    if (arrayString.Length > 3)
+                        result.Add(new ParadigmStruct() { EndingWord = arrayString[0], PartOfSpeech = arrayString[2], Kind = arrayString[3] });
+                }
+            }
+
+            return result;
+        }
+
+        /// <summary>
+        /// Конвертация слова в лемму
+        /// </summary>
+        /// <param name="word">Слово для которого требуется лемматизация</param>
+        /// <returns>ParadigmStruct</returns>
+        private ParadigmStruct GetParadigmStruct(string word)
+        {
+            var paradigmList = lem.CreateParadigmCollectionFromForm(word, false, false);
+            if (paradigmList.Count > 0)
+            {
+                var gram = rgramtab.Where(x => x.EndingWord == paradigmList[0].GetAncode(0)).FirstOrDefault();
+                return new ParadigmStruct()
+                {
+                    NormalForm = paradigmList[0].Norm,
+                    PartOfSpeech = gram.PartOfSpeech,
+                    Kind = gram.Kind,
+                    EndingWord = gram.EndingWord
+                };
+            }
+            else
+            {
+                return new ParadigmStruct();
+            }
+        }
+
+        private string[] GetWordsFromText(string text)
+        {
+            // Разбиваем текст на массив слов
+            // Убираем знаки препинания, лишние пробелы и переносы строк
+            //
+            return Regex.Replace(text, "[-.?!)(,:\r\n]", " ").Split(' ')
+                .Where(x => !String.IsNullOrWhiteSpace(x)).ToArray();
         }
     }
 }
