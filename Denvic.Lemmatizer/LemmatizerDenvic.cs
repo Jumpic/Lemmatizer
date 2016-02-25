@@ -12,11 +12,26 @@ using System.Text.RegularExpressions;
 
 namespace Denvic.Lemmatizer
 {
-    struct ParadigmStruct
+    /// <summary>
+    /// Структура леммы
+    /// </summary>
+    struct ParadigmStruct 
     {
+        /// <summary>
+        /// Часть речи
+        /// </summary>
         public string PartOfSpeech;
+        /// <summary>
+        /// Окончание слова
+        /// </summary>
         public string EndingWord;
+        /// <summary>
+        /// Лемма, нормальная (начальная) форма слова
+        /// </summary>
         public string NormalForm;
+        /// <summary>
+        /// Описание (род, число, падеж)
+        /// </summary>
         public string Kind;
     }
 
@@ -32,6 +47,8 @@ namespace Denvic.Lemmatizer
 
         public LemmatizerDenvic()
         {
+            // Загрузка словарей из директории библиотеки
+            //
             LoadDict("");
         }
         
@@ -81,10 +98,13 @@ namespace Denvic.Lemmatizer
             // Если слова нет в словаре, то оно не попадет в итоговую коллекцию
             //
 
-            var result = arrayWords.Select( x => GetNormalForm(x)).ToArray();
+            var result = arrayWords.Where(word => word.Length > 2).Select( word => GetNormalForm(word)).ToArray();
+
+            // Если не нужны дубли - режем
+            //
             if (!duplicate)
             {
-                result = result.GroupBy(x => x).Select(x => x.Key).ToArray();
+                result = result.GroupBy(word => word).Select(word => word.Key).ToArray();
             }
 
             return result;
@@ -160,9 +180,10 @@ namespace Denvic.Lemmatizer
 
             // Преобразуем в нормальную форму
             // Если слова нет в словаре, то оно не попадет в итоговую коллекцию
+            // Отбор только глаголов, существительных и прилагательных длинее двух символов
             //
-            var result = arrayWords.Select(x => GetParadigmStruct(x))
-                        .Where(x => x.PartOfSpeech == "ИНФИНИТИВ" || x.PartOfSpeech == "С" || x.PartOfSpeech == "П").ToArray()
+            var result = arrayWords.Select(word => GetParadigmStruct(word))
+                        .Where(lem => (lem.PartOfSpeech == "ИНФИНИТИВ" || lem.PartOfSpeech == "С" || lem.PartOfSpeech == "П") && lem.NormalForm.Length > 2).ToArray()
                         .GroupBy(lem => lem.NormalForm)
                         .Select(lem => new DenvicLemma(lem.Key, lem.Count(), lem.First().PartOfSpeech, lem.First().Kind))
                         .ToArray();
@@ -183,9 +204,10 @@ namespace Denvic.Lemmatizer
 
         /// <summary>
         /// Версия библиотеки
-        /// </summary>
+        /// </summary>        
         public string Version
         {
+            [return: MarshalAs(UnmanagedType.BStr)]
             get
             {
                 var version = typeof(LemmatizerDenvic).Assembly.GetName().Version;
@@ -244,8 +266,11 @@ namespace Denvic.Lemmatizer
         {
             // Разбиваем текст на массив слов
             // Убираем знаки препинания, лишние пробелы и переносы строк
+            // Кроме дефиса, т.к. в тексте часто попадаются сокращения наподобии "предпр-ия" и т.д. бывает 
+            // находит окончания, что не будет соответствовать действительности
             //
-            return Regex.Replace(text, "[-.?!)(,:\r\n]", " ").Split(' ')
+            //return Regex.Replace(text, "[-.?!)(,:\r\n]", " ").Split(' ')
+            return Regex.Replace(text, "[.?!)(,:\r\n]", " ").Split(' ')
                 .Where(x => !String.IsNullOrWhiteSpace(x)).ToArray();
         }
     }
